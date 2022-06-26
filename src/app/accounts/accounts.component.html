@@ -1,1 +1,51 @@
-<p>accounts works!</p>
+<div class="container mt-2">
+  <div class="row">
+    <div class="col col-md-6">
+      <div class="card">
+        <div class="card-header">Accounts</div>
+        <div class="card-body">
+          <form [formGroup]="accountFormGroup" (ngSubmit)="handleSearchAccount()">
+            <div class="input-group">
+              <label class="input-group-text">Account Id :</label>
+              <input type="text" formControlName="accountId" class="form-control">
+              <button class="btn btn-info">
+                <i class="bi bi-search"></i>
+                Search
+              </button>
+            </div>
+          </form>
+          <div class="mb-3">
+            <ng-container *ngIf="accountObservable | async as accountDetails">
+              <div class="mb-2">
+                <label>Account ID :</label>
+                <label><strong>{{accountDetails.accountId}}</strong></label>
+              </div>
+              <div class="mb-2">
+                <label>Balance :</label>
+                <label><strong>{{accountDetails.balance | number : '1.2-2'}}</strong></label>
+              </div>
+              <table class="table">
+                <thead>
+                <th>ID</th><th>Date</th><th>Type</th><th>Amount</th><th>Description</th>
+                </thead>
+                <tbody>
+                <tr *ngFor="let op of accountDetails.accountOperationDTOS">
+                  <td>{{op.id}}</td>
+                  <td>{{op.operationDate}}</td>
+                  <td>{{op.type}}</td>
+                  <td>{{op.amount}}</td>
+                  <td>{{op.description}}</td>
+                </tr>
+                </tbody>
+              </table>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col col-md-6">
+
+    </div>
+  </div>
+
+</div>
