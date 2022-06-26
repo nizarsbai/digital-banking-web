@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {Form, FormBuilder, FormGroup} from "@angular/forms";
+import {FormBuilder, FormGroup} from "@angular/forms";
 import {AccountsService} from "../services/accounts.service";
-import {Observable} from "rxjs";
+import {catchError, Observable, throwError} from "rxjs";
 import {AccountDetails} from "../model/account.model";
 
 @Component({
@@ -11,10 +11,11 @@ import {AccountDetails} from "../model/account.model";
 })
 export class AccountsComponent implements OnInit {
   accountFormGroup! : FormGroup;
-  currentPage : number=0;
-  pageSize : number=5;
+  currentPage : number =0;
+  pageSize : number =5;
   accountObservable! : Observable<AccountDetails>
-  operationFormGroup! : FormGroup;
+  operationFromGroup! : FormGroup;
+  errorMessage! :string ;
 
   constructor(private fb : FormBuilder, private accountService : AccountsService) { }
 
@@ -22,17 +23,21 @@ export class AccountsComponent implements OnInit {
     this.accountFormGroup=this.fb.group({
       accountId : this.fb.control('')
     });
-    this.operationFormGroup=this.fb.group({
+    this.operationFromGroup=this.fb.group({
       operationType : this.fb.control(null),
       amount : this.fb.control(0),
       description : this.fb.control(null),
       accountDestination : this.fb.control(null)
-    })
-  }
+    })}
 
   handleSearchAccount() {
-    let accountId : string=this.accountFormGroup.value.accountId;
-    this.accountObservable=this.accountService.getAccount(accountId, this.currentPage, this.pageSize);
+    let accountId : string =this.accountFormGroup.value.accountId;
+    this.accountObservable=this.accountService.getAccount(accountId,this.currentPage, this.pageSize).pipe(
+      catchError(err => {
+        this.errorMessage=err.message;
+        return throwError(err);
+      })
+    );
   }
 
   gotoPage(page: number) {
@@ -41,27 +46,27 @@ export class AccountsComponent implements OnInit {
   }
 
   handleAccountOperation() {
-    let accountId :string =this.accountFormGroup.value.accountId;
-    let operationType =this.operationFormGroup.value.operationType;
-    let amount:number=this.operationFormGroup.value.amount;
-    let description:string=this.operationFormGroup.value.description;
-    let accountDestination:string=this.operationFormGroup.value.accountDestination;
+    let accountId :string = this.accountFormGroup.value.accountId;
+    let operationType=this.operationFromGroup.value.operationType;
+    let amount :number =this.operationFromGroup.value.amount;
+    let description :string =this.operationFromGroup.value.description;
+    let accountDestination :string =this.operationFromGroup.value.accountDestination;
     if(operationType=='DEBIT'){
       this.accountService.debit(accountId, amount,description).subscribe({
         next : (data)=>{
           alert("Success Credit");
-          this.operationFormGroup.reset();
+          this.operationFromGroup.reset();
           this.handleSearchAccount();
         },
         error : (err)=>{
           console.log(err);
         }
       });
-    } else if (operationType=='CREDIT'){
+    } else if(operationType=='CREDIT'){
       this.accountService.credit(accountId, amount,description).subscribe({
         next : (data)=>{
           alert("Success Debit");
-          this.operationFormGroup.reset();
+          this.operationFromGroup.reset();
           this.handleSearchAccount();
         },
         error : (err)=>{
@@ -70,10 +75,10 @@ export class AccountsComponent implements OnInit {
       });
     }
     else if(operationType=='TRANSFER'){
-      this.accountService.transfer(accountId,accountDestination ,amount,description).subscribe({
+      this.accountService.transfer(accountId,accountDestination, amount,description).subscribe({
         next : (data)=>{
           alert("Success Transfer");
-          this.operationFormGroup.reset();
+          this.operationFromGroup.reset();
           this.handleSearchAccount();
         },
         error : (err)=>{
