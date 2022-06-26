@@ -26,18 +26,23 @@
               </div>
               <table class="table">
                 <thead>
-                <th>ID</th><th>Date</th><th>Type</th><th>Amount</th><th>Description</th>
+                <th>ID</th><th>Date</th><th>Type</th><th>Amount</th>
                 </thead>
                 <tbody>
                 <tr *ngFor="let op of accountDetails.accountOperationDTOS">
                   <td>{{op.id}}</td>
-                  <td>{{op.operationDate}}</td>
+                  <td>{{op.operationDate | date : 'dd-MM-yyyy'}}</td>
                   <td>{{op.type}}</td>
-                  <td>{{op.amount}}</td>
-                  <td>{{op.description}}</td>
+                  <td class="text-end">{{op.amount | number : '1.2-2'}}</td>
+
                 </tr>
                 </tbody>
               </table>
+              <ul class="nav nav-pills">
+                <li *ngFor="let item of [].constructor(accountDetails.totalPages);let page=index">
+                  <a (click)="gotoPage(page)" class="btn btn-outline-info ms-1 mt-1">{{page}}</a>
+                </li>
+              </ul>
             </ng-container>
           </div>
         </div>
